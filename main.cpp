@@ -1,9 +1,9 @@
 #include <windows.h>
 #include <stdlib.h>
 
-#define FILE_MENU_NEW
-#define FILE_MENU_EXIT
-#define FUN_BUTTON
+#define FILE_MENU_NEW 1
+#define FILE_MENU_EXIT 2
+#define FUN_BUTTON 3
 
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 
@@ -28,7 +28,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
         return -1;
 
     //建立新視窗
-    CreateWindowW(L"WindowClass", L"Stephanie Wang's assignment", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 500, 850, NULL, NULL, NULL, NULL);
+    CreateWindowW(L"WindowClass", L"Stephanie Wang's assignment", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 500, 880, NULL, NULL, NULL, NULL);
 
     //迴圈取得視窗訊息
     MSG msg = {0};
@@ -49,6 +49,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
     case WM_COMMAND:
 
         switch(wp){
+
             case FILE_MENU_EXIT:
                 DestroyWindow(hWnd);
                 break;
@@ -67,7 +68,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
                 GetWindowText(hPhone, phone, 25);
                 GetWindowText(hSpec, spec, 30);
 
-                //字串複製
+                //字串複製cpy串接cat
                 strcat(out, "Health Care Facility Type : ");
                 strcpy(out, type);
                 strcat(out, "Facilities List :\n");
@@ -101,10 +102,12 @@ void AddMenu(HWND hWnd){
     hMenu = CreateMenu();
     HMENU hFileMenu = CreateMenu();
 
+    //subMenu
     AppendMenu(hFileMenu, MF_STRING, FILE_MENU_NEW, "New");
     AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
     AppendMenu(hFileMenu, MF_STRING, FILE_MENU_EXIT, "EXIT");
 
+    //rootMenu
     AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, "File");
 
     SetMenu(hWnd, hMenu);
@@ -133,3 +136,4 @@ void AddControls(HWND hWnd){
     hOut = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 50, 375, 380, 400, hWnd, NULL, NULL, NULL);
 
 }
+

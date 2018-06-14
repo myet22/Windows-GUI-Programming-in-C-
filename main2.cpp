@@ -1,5 +1,3 @@
-//This is for save file
-
 #include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,7 +12,78 @@ void AddMenu(HWND);
 void AddControls(HWND);
 
 HWND hType, hId, hName, hAddress, hPhone, hSpec, hOut, hEdit;
-HMENU hMenu;
+
+
+class Fac_info {
+
+public:
+
+    char type[30];
+    char id[10];
+    char name[30];
+    char address[150];
+    char phone[25];
+    char spec[30];
+    char out[300];
+
+};
+
+
+    void write_file(char* path){
+
+        FILE *file;
+        file = fopen(path, "w");
+
+        int _size = GetWindowTextLength(hOut);
+        char *data = new char[_size+1];
+        GetWindowText(hOut, data, _size+1);
+
+        fwrite(data, _size+1, 1, file);
+
+        fclose(file);
+
+    }
+
+    void save_file(HWND hWnd){
+
+        OPENFILENAME ofn;
+
+        char file_name[100];
+
+        ZeroMemory(&ofn, sizeof(OPENFILENAME));
+
+        ofn.lStructSize = sizeof(OPENFILENAME);
+        ofn.hwndOwner = hWnd;
+        ofn.lpstrFile = file_name;
+        ofn.lpstrFile[0] = '\0';
+        ofn.nMaxFile = 300;
+        ofn.lpstrFilter = "ALL files\0*.*\0Source Files\0*.CPP\0Text Files\0*.TXT\0";
+        ofn.nFilterIndex = 1;
+
+        //Need to add a reference to libcomdlg32.a
+        GetSaveFileName(&ofn);
+
+        write_file(ofn.lpstrFile);
+
+    }
+
+    void OutputText(char *Out, char *Type, char *Id, char *Name, char *Address, char *Phone, char *Spec){
+
+        strcat(Out, "Health Care Facility Type : ");
+        strcat(Out, Type);
+        strcat(Out, "\r\n\r\nFacilities List :");
+        strcat(Out, "\r\n\tFacilities Id :");
+        strcat(Out, Id);
+        strcat(Out, "\r\n\tFacilities Name :");
+        strcat(Out, Name);
+        strcat(Out, "\r\n\tAddress :");
+        strcat(Out, Address);
+        strcat(Out, "\r\n\tPhone Number :");
+        strcat(Out, Phone);
+        strcat(Out, "\r\n\tSpecialty :");
+        strcat(Out, Spec);
+
+    }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
 
@@ -31,7 +100,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
         return -1;
 
     //建立主視窗
-    CreateWindowW(L"WindowClass", L"Stephanie Wang's assignment", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 500, 880, NULL, NULL, NULL, NULL);
+    CreateWindowW(L"WindowClass", L"Stephanie Wang's assignment", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 500, 650, NULL, NULL, NULL, NULL);
 
     //迴圈取得視窗訊息
     MSG msg = {0};
@@ -43,43 +112,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     return 0;
 }
 
-void write_file(char* path){
-
-    FILE *file;
-    file = fopen(path, "w");
-
-    int _size = GetWindowTextLength(hOut);
-    char *data = new char[_size+1];
-    GetWindowText(hOut, data, _size+1);
-
-    fwrite(data, _size+1, 1, file);
-
-    fclose(file);
-
-}
-
-void save_file(HWND hWnd){
-
-    OPENFILENAME ofn;
-
-    char file_name[100];
-
-    ZeroMemory(&ofn, sizeof(OPENFILENAME));
-
-    ofn.lStructSize = sizeof(OPENFILENAME);
-    ofn.hwndOwner = hWnd;
-    ofn.lpstrFile = file_name;
-    ofn.lpstrFile[0] = '\0';
-    ofn.nMaxFile = 100;
-    ofn.lpstrFilter = "ALL files\0*.*\0Source Files\0*.CPP\0Text Files\0*.TXT\0";
-    ofn.nFilterIndex = 1;
-
-    //Need to add a reference to libcomdlg32.a
-    GetSaveFileName(&ofn);
-
-    write_file(ofn.lpstrFile);
-
-}
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
 
@@ -90,33 +122,21 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
 
         switch(wp){
 
-            case FILE_MENU_EXIT:
-                DestroyWindow(hWnd);
-                break;
-
-            case FILE_MENU_NEW:
-                //清空表單
-                break;
-
             case SAVE_FILE_BUTTON:
 
                 //show the type info
-                char type[30], id[10], name[30], address[150], phone[25], spec[30], out[300];
-                GetWindowText(hType, type, 30);
-                GetWindowText(hId, id, 10);
-                GetWindowText(hName, name, 30);
-                GetWindowText(hAddress, address, 150);
-                GetWindowText(hPhone, phone, 25);
-                GetWindowText(hSpec, spec, 30);
+                Fac_info fi;
+           //     char type[30], id[10], name[30], address[150], phone[25], spec[30], out[300];
+                GetWindowText(hType, fi.type, 30);
+                GetWindowText(hId, fi.id, 10);
+                GetWindowText(hName, fi.name, 30);
+                GetWindowText(hAddress, fi.address, 150);
+                GetWindowText(hPhone, fi.phone, 25);
+                GetWindowText(hSpec, fi.spec, 30);
 
-                //字串複製cpy串接cat
-                strcat(out, "Health Care Facility Type : ");
-                strcpy(out, type);
-                strcat(out, "Facilities List :");
-                strcat(out, "Facilities List :");
+                OutputText(fi.out, fi.type, fi.id, fi.name, fi.address, fi.phone, fi.spec);
 
-                SetWindowText(hOut, out);
-
+                SetWindowText(hOut, fi.out);
                 save_file(hWnd);
 
                 break;
@@ -125,7 +145,6 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
         break;
 
     case WM_CREATE:
-        AddMenu(hWnd);
         AddControls(hWnd);
         break;
 
@@ -135,25 +154,8 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
 
     default:
         return DefWindowProcW(hWnd, msg, wp, lp);
+
     }
-}
-
-
-void AddMenu(HWND hWnd){
-
-    hMenu = CreateMenu();
-    HMENU hFileMenu = CreateMenu();
-
-    //subMenu
-    AppendMenu(hFileMenu, MF_STRING, FILE_MENU_NEW, "New");
-    AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hFileMenu, MF_STRING, FILE_MENU_EXIT, "EXIT");
-
-    //rootMenu
-    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, "File");
-
-    SetMenu(hWnd, hMenu);
-
 }
 
 
@@ -174,9 +176,8 @@ void AddControls(HWND hWnd){
     CreateWindowW(L"Static", L"Specialties :", WS_VISIBLE | WS_CHILD | SS_RIGHT, 80, 275, 100, 50, hWnd, NULL, NULL, NULL);
     hSpec = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 200, 275, 220, 23, hWnd, NULL, NULL, NULL);
 
-    CreateWindowW(L"Button", L"Save as .Txt", WS_VISIBLE | WS_CHILD, 190, 325, 100, 25, hWnd, (HMENU)SAVE_FILE_BUTTON, NULL, NULL);
-    CreateWindowW(L"Button", L"Open file", WS_VISIBLE | WS_CHILD, 320, 325, 100, 25, hWnd, (HMENU)SAVE_FILE_BUTTON, NULL, NULL);
-    hOut = CreateWindowW(L"Edit", L"insert data", WS_VISIBLE | WS_CHILD | WS_BORDER | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE, 50, 375, 380, 200, hWnd, NULL, NULL, NULL);
+    CreateWindowW(L"Button", L"SAVE", WS_VISIBLE | WS_CHILD, 190, 325, 100, 25, hWnd, (HMENU)SAVE_FILE_BUTTON, NULL, NULL);
+    hOut = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE, 50, 375, 380, 200, hWnd, NULL, NULL, NULL);
 
 }
 

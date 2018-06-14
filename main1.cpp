@@ -1,3 +1,5 @@
+//This is for open the file practice
+
 #include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>

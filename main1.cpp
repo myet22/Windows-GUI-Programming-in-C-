@@ -1,16 +1,19 @@
+//This is for open the file practice
+
 #include <windows.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define FILE_MENU_NEW 1
 #define FILE_MENU_EXIT 2
-#define FUN_BUTTON 3
+#define SAVE_FILE_BUTTON 3
 
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 
 void AddMenu(HWND);
 void AddControls(HWND);
 
-HWND hType, hId, hName, hAddress, hPhone, hSpec, hOut;
+HWND hType, hId, hName, hAddress, hPhone, hSpec, hOut, hEdit;
 HMENU hMenu;
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
@@ -27,7 +30,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     if(!RegisterClassW(&wc))
         return -1;
 
-    //建立新視窗
+    //建立主視窗
     CreateWindowW(L"WindowClass", L"Stephanie Wang's assignment", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 500, 880, NULL, NULL, NULL, NULL);
 
     //迴圈取得視窗訊息
@@ -40,6 +43,46 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     return 0;
 }
 
+void display_file(char* path){
+
+    FILE *file;
+    file = fopen(path, "rb");
+    fseek(file, 0, SEEK_END);
+    int _size = ftell(file);
+    rewind(file);
+    char *data = new char[_size+1];
+    fread(data, _size, 1, file);
+    data[_size] = '\0';
+
+    SetWindowText(hEdit, data);
+
+}
+
+void open_file(HWND hWnd){
+
+    OPENFILENAME ofn;
+
+    char file_name[100];
+
+    ZeroMemory(&ofn, sizeof(OPENFILENAME));
+
+    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.hwndOwner = hWnd;
+    ofn.lpstrFile = file_name;
+    ofn.lpstrFile[0] = '\0';
+    ofn.nMaxFile = 100;
+    ofn.lpstrFilter = "ALL files\0*.*\0Source Files\0*.CPP\0Text Files\0*.TXT\0";
+    ofn.nFilterIndex = 1;
+
+    //Need to add a reference to libcomdlg32.a
+    GetOpenFileName(&ofn);
+
+    display_file(ofn.lpstrFile);
+
+    //Show the choosing file for check
+    //MessageBox(NULL, ofn.lpstrFile, "", MB_OK);
+
+}
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
 
@@ -58,8 +101,9 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
                 MessageBeep(MB_ICONINFORMATION);
                 break;
 
-            case FUN_BUTTON:
+            case SAVE_FILE_BUTTON:
 
+                //show the type info
                 char type[30], id[10], name[30], address[150], phone[25], spec[30], out[300];
                 GetWindowText(hType, type, 30);
                 GetWindowText(hId, id, 10);
@@ -71,13 +115,15 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp){
                 //字串複製cpy串接cat
                 strcat(out, "Health Care Facility Type : ");
                 strcpy(out, type);
-                strcat(out, "Facilities List :\n");
+                strcat(out, "Facilities List :");
                 strcat(out, "Facilities List :");
 
                 SetWindowText(hOut, out);
 
-                break;
+                //show the choosing file
+                open_file(hWnd);
 
+                break;
         }
 
         break;
@@ -132,8 +178,10 @@ void AddControls(HWND hWnd){
     CreateWindowW(L"Static", L"Specialties :", WS_VISIBLE | WS_CHILD | SS_RIGHT, 80, 275, 100, 50, hWnd, NULL, NULL, NULL);
     hSpec = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 200, 275, 220, 23, hWnd, NULL, NULL, NULL);
 
-    CreateWindowW(L"Button", L"Save as .Txt", WS_VISIBLE | WS_CHILD, 190, 325, 100, 25, hWnd, (HMENU)FUN_BUTTON, NULL, NULL);
-    hOut = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 50, 375, 380, 400, hWnd, NULL, NULL, NULL);
+//    CreateWindowW(L"Button", L"Save as .Txt", WS_VISIBLE | WS_CHILD, 190, 325, 100, 25, hWnd, (HMENU)SAVE_FILE_BUTTON, NULL, NULL);
+    CreateWindowW(L"Button", L"Open file", WS_VISIBLE | WS_CHILD, 320, 325, 100, 25, hWnd, (HMENU)SAVE_FILE_BUTTON, NULL, NULL);
+    hOut = CreateWindowW(L"Edit", L"insert data", WS_VISIBLE | WS_CHILD | WS_BORDER, 50, 375, 380, 200, hWnd, NULL, NULL, NULL);
+    hEdit = CreateWindowW(L"Edit", L"open file", WS_VISIBLE | WS_CHILD | WS_BORDER, 50, 585, 380, 200, hWnd, NULL, NULL, NULL);
 
 }
 
